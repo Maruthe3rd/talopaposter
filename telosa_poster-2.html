@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TELOSA - Interaktives Poster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:      #131C29;
+    --night-2:    #1D2C3F;
+    --sand:       #ECE3CE;
+    --sand-deep:  #DCCBA0;
+    --sand-line:  #C9B589;
+    --ink:        #1D2521;
+    --rust:       #A8481F;
+    --rust-deep:  #7E3417;
+    --teal:       #1C6E68;
+    --teal-deep:  #124E4A;
+    --gold:       #C0922F;
+    --gold-deep:  #93701F;
+    --shadow:     rgba(19,28,41,0.22);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    background:#0F1620;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(192,146,47,0.10), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(28,110,104,0.14), transparent 45%);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    font-weight:500;
+  }
+
+  button{ font-family:inherit; }
+
+  /* ============= OVERVIEW STAGE (A4 quer, alles auf einen Blick) ============= */
+  .stage{
+    width:min(96vw, calc(90vh * 1.41421), 1440px);
+    aspect-ratio:297 / 210;
+    margin:2.2vh auto;
+    background:var(--sand);
+    box-shadow:0 40px 80px var(--shadow);
+    display:flex;
+    flex-direction:column;
+    font-size:clamp(10.5px, 1.05vw, 16px);
+    position:relative;
+    overflow:hidden;
+  }
+
+  .hint{
+    text-align:center;
+    color:#8A9AA8;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:clamp(10px, 0.95vw, 13px);
+    margin:0 0 0.6em;
+    letter-spacing:0.04em;
+  }
+
+  /* ---- hero strip ---- */
+  .hero{
+    position:relative;
+    background:var(--night);
+    color:var(--sand);
+    padding:1.4em 1.8em 1.1em;
+    flex:0 0 auto;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1.4em;
+  }
+  .hero-art{
+    position:absolute; right:0; bottom:0; height:100%; width:46%;
+    opacity:0.5;
+  }
+  .hero-left{ position:relative; z-index:2; }
+  .hero-eyebrow{ color:var(--gold); display:flex; align-items:center; gap:0.5em; font-size:0.68em; margin-bottom:0.5em; }
+  .hero-eyebrow::before{ content:""; width:20px; height:1px; background:var(--gold); display:inline-block; }
+  h1.title{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:2.7em;
+    line-height:0.95;
+    margin:0 0 0.28em;
+    letter-spacing:-0.01em;
+  }
+  .tagline{
+    font-size:0.92em;
+    max-width:26em;
+    color:#D9CFB4;
+    line-height:1.42;
+    margin:0;
+    font-weight:300;
+  }
+  .hero-stats{
+    position:relative; z-index:2;
+    display:flex;
+    gap:1.6em;
+    flex-wrap:wrap;
+    flex:0 0 auto;
+  }
+  .hero-stat{ text-align:right; }
+  .hero-stat b{
+    display:block;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:1.25em;
+    color:var(--sand);
+  }
+  .hero-stat span{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.6em;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:#B7AC8C;
+  }
+
+  /* ---- cards grid ---- */
+  .grid{
+    flex:1 1 auto;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    grid-template-rows:repeat(2, 1fr);
+    gap:1px;
+    background:var(--sand-line);
+    border-top:1px solid var(--sand-line);
+    border-bottom:1px solid var(--sand-line);
+  }
+  .card{
+    background:var(--sand);
+    border:none;
+    text-align:left;
+    padding:1.1em 1.2em;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    position:relative;
+    transition:background 0.18s ease, transform 0.18s ease;
+    color:var(--ink);
+  }
+    .card{ touch-action:manipulation; -webkit-tap-highlight-color:rgba(0,0,0,0); }
+  @media (hover:hover) and (pointer:fine){
+    .card:hover{ background:#F4ECD9; transform:translateY(-2px); }
+  }
+  .card:active{ background:#F4ECD9; }
+  .card-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:0.6em; }
+  .card .icon{ width:1.9em; height:1.9em; flex:none; }
+  .card-idx{ font-family:'IBM Plex Mono', monospace; font-size:0.62em; color:#9C8F6E; letter-spacing:0.06em; }
+  .card h3{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:1.12em;
+    font-weight:600;
+    margin:0.55em 0 0.3em;
+    line-height:1.15;
+  }
+  .card p{ font-size:0.78em; line-height:1.4; margin:0; color:#43392A; }
+  .card .go{
+    margin-top:0.7em;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.66em;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    display:flex; align-items:center; gap:0.4em;
+    font-weight:600;
+  }
+  .card .go svg{ width:0.9em; height:0.9em; transition:transform 0.18s ease; }
+  .card:hover .go svg{ transform:translateX(3px); }
+
+  .card.c-projekt   .icon,.card.c-projekt   .go{ color:var(--night-2); }
+  .card.c-konzept   .icon,.card.c-konzept   .go{ color:var(--teal-deep); }
+  .card.c-sozial    .icon,.card.c-sozial    .go{ color:var(--gold-deep); }
+  .card.c-oekonomisch .icon,.card.c-oekonomisch .go{ color:var(--rust-deep); }
+  .card.c-oekologisch .icon,.card.c-oekologisch .go{ color:var(--teal-deep); }
+  .card.c-kritik    .icon,.card.c-kritik    .go{ color:var(--rust-deep); }
+
+  .card::after{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0; width:4px;
+    background:transparent;
+  }
+  .card.c-projekt::after{ background:var(--night-2); }
+  .card.c-konzept::after{ background:var(--teal); }
+  .card.c-sozial::after{ background:var(--gold); }
+  .card.c-oekonomisch::after{ background:var(--rust); }
+  .card.c-oekologisch::after{ background:var(--teal-deep); }
+  .card.c-kritik::after{ background:var(--rust-deep); }
+
+  /* ---- footer strip ---- */
+  .footer{
+    flex:0 0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0.6em 1.3em;
+    background:var(--sand-deep);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.6em;
+    color:#5C5340;
+  }
+
+  /* ============= SUBPAGES ============= */
+  .subpage{
+    position:fixed; inset:0;
+    background:var(--sand);
+    z-index:50;
+    display:none;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .subpage.active{ display:block; animation:slideIn 0.28s ease; }
+  @keyframes slideIn{ from{ opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+
+  .subpage-topbar{
+    background:var(--night);
+    color:var(--sand);
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    padding:0.85rem 1.6rem;
+    position:sticky; top:0; z-index:5;
+  }
+  .back-btn{
+    background:transparent;
+    border:1px solid rgba(236,227,206,0.35);
+    color:var(--sand);
+    border-radius:3px;
+    padding:0.4rem 0.8rem;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    display:flex; align-items:center; gap:0.4rem;
+  }
+  .back-btn:hover{ background:rgba(236,227,206,0.1); }
+  .back-btn svg{ width:0.9rem; height:0.9rem; }
+  .crumb{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:#9AAFC2; letter-spacing:0.05em; }
+  .crumb b{ color:var(--gold); }
+
+  .subpage-hero{
+    padding:2.4rem 2.6rem 1.8rem;
+    display:flex; align-items:center; gap:1.2rem;
+    color:var(--sand);
+  }
+  .subpage-hero .icon{ width:2.6rem; height:2.6rem; flex:none; }
+  .subpage-hero h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:clamp(1.7rem,3.2vw,2.5rem);
+    margin:0 0 0.3rem;
+    font-weight:600;
+  }
+  .subpage-hero p{ margin:0; font-size:0.95rem; max-width:42rem; line-height:1.5; }
+
+  .sp-projekt .subpage-hero, .sp-projekt .subpage-topbar{ background:var(--night); }
+  .sp-konzept .subpage-hero, .sp-konzept .subpage-topbar{ background:var(--teal-deep); }
+  .sp-sozial .subpage-hero, .sp-sozial .subpage-topbar{ background:#5C4614; }
+  .sp-oekonomisch .subpage-hero, .sp-oekonomisch .subpage-topbar{ background:var(--rust-deep); }
+  .sp-oekologisch .subpage-hero, .sp-oekologisch .subpage-topbar{ background:var(--teal-deep); }
+  .sp-kritik .subpage-hero, .sp-kritik .subpage-topbar{ background:#4A2011; }
+
+  .subpage-body{ padding:2rem 2.6rem 3.5rem; max-width:64rem; margin:0 auto; }
+
+  .fact-cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.4rem; margin-bottom:0.4rem; }
+  .fact-card{ background:var(--sand-deep); border:1px solid var(--sand-line); padding:1.3rem 1.4rem; }
+  .fact-card .icon{ width:1.7rem; height:1.7rem; color:var(--rust-deep); margin-bottom:0.7rem; }
+  .fact-card h3{ font-family:'Space Grotesk', sans-serif; font-size:1rem; margin:0 0 0.6rem; text-transform:uppercase; letter-spacing:0.03em; }
+  .fact-card ul{ margin:0; padding-left:1.05rem; font-size:0.87rem; line-height:1.55; }
+  .fact-card li{ margin-bottom:0.5rem; }
+  .fact-card li:last-child{ margin-bottom:0; }
+
+  .intro-text{ font-size:0.95rem; line-height:1.6; max-width:52rem; margin:0 0 1.6rem; }
+
+  .feature-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px; background:var(--sand-line); border:1px solid var(--sand-line); }
+  .feature{ background:var(--sand); padding:1.2rem 1.1rem 1.4rem; }
+  .feature .icon{ width:1.5rem; height:1.5rem; color:var(--teal-deep); margin-bottom:0.7rem; }
+  .feature h4{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; margin:0 0 0.5rem; color:var(--rust-deep); }
+  .feature p{ font-size:0.83rem; line-height:1.5; margin:0; }
+
+  .pro-contra{ display:grid; grid-template-columns:1fr 1fr; gap:1.6rem; }
+  .pc-col h3{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; margin:0 0 0.9rem; color:#6B6046; }
+  .pc-list{ list-style:none; margin:0; padding:0; }
+  .pc-list li{ display:flex; gap:0.65rem; margin-bottom:0.9rem; font-size:0.92rem; line-height:1.5; }
+  .mark{ flex:none; width:1.3rem; height:1.3rem; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-size:0.78rem; font-weight:600; margin-top:0.1rem; }
+  .mark.plus{ background:var(--accent,var(--teal)); color:#fff; }
+  .mark.minus{ background:transparent; border:1.5px solid var(--accent,var(--rust)); color:var(--accent,var(--rust)); }
+  .sp-sozial .mark.plus{ background:var(--gold-deep); } .sp-sozial .mark.minus{ border-color:var(--gold-deep); color:var(--gold-deep); }
+  .sp-oekonomisch .mark.plus{ background:var(--rust); } .sp-oekonomisch .mark.minus{ border-color:var(--rust); color:var(--rust); }
+  .sp-oekologisch .mark.plus{ background:var(--teal); } .sp-oekologisch .mark.minus{ border-color:var(--teal); color:var(--teal); }
+
+  .lob-kritik{ display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; margin-bottom:1.6rem; }
+  .ek-block{ background:var(--sand-deep); padding:1.4rem 1.5rem; border:1px solid var(--sand-line); }
+  .ek-block h3{ font-family:'Space Grotesk', sans-serif; font-size:1.02rem; margin:0 0 0.8rem; }
+  .ek-block.lob h3{ color:var(--teal-deep); }
+  .ek-block.kritik h3{ color:var(--rust-deep); }
+  .ek-block ul{ margin:0; padding-left:1.1rem; font-size:0.88rem; line-height:1.6; }
+  .ek-block li{ margin-bottom:0.55rem; }
+
+  .system-critique{
+    background:var(--night);
+    color:var(--sand);
+    padding:1.6rem 1.8rem;
+    margin-bottom:1.6rem;
+    border-left:5px solid var(--rust);
+  }
+  .system-critique .sc-head{ display:flex; align-items:center; gap:0.7rem; margin-bottom:0.9rem; }
+  .system-critique .icon{ width:1.6rem; height:1.6rem; color:var(--gold); flex:none; }
+  .system-critique h3{ font-family:'Space Grotesk', sans-serif; font-size:1.08rem; margin:0; color:var(--sand); }
+  .system-critique p{ font-size:0.9rem; line-height:1.62; color:#DCD3B8; margin:0 0 0.9rem; }
+  .system-critique p:last-child{ margin-bottom:0; }
+  .system-critique .counter{
+    font-size:0.82rem; color:#9AAFC2; border-top:1px solid rgba(236,227,206,0.18); padding-top:0.8rem; margin-top:0.2rem;
+  }
+
+  .fazit{ background:var(--sand-deep); border:1px solid var(--sand-line); padding:1.4rem 1.6rem; display:flex; gap:1rem; align-items:flex-start; }
+  .fazit .icon{ width:1.7rem; height:1.7rem; flex:none; color:var(--gold-deep); margin-top:0.1rem; }
+  .fazit p{ margin:0; font-size:0.9rem; line-height:1.55; }
+
+  .sources-box{ margin-top:2rem; padding-top:1.2rem; border-top:1px solid var(--sand-line); font-family:'IBM Plex Mono', monospace; font-size:0.68rem; color:#6B6046; line-height:1.7; }
+  .sources-box b{ display:block; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink); margin-bottom:0.35rem; }
+
+  @media (max-width:760px){
+    .stage{ width:96vw; aspect-ratio:auto; height:auto; font-size:13px; }
+    .hero{ flex-direction:column; align-items:flex-start; }
+    .hero-art{ display:none; }
+    .hero-stats{ flex-wrap:wrap; }
+    .hero-stat{ text-align:left; }
+    .grid{ grid-template-columns:1fr; grid-template-rows:none; }
+    .fact-cards{ grid-template-columns:1fr; }
+    .pro-contra{ grid-template-columns:1fr; }
+    .lob-kritik{ grid-template-columns:1fr; }
+    .subpage-body{ padding:1.6rem 1.3rem 3rem; }
+    .subpage-hero{ padding:1.8rem 1.3rem 1.4rem; }
+  }
+
+  @media print{
+    @page{ size:A4 landscape; margin:8mm; }
+    body{ background:#fff; }
+    .stage{ box-shadow:none; margin:0; }
+    .hint{ display:none; }
+    .subpage{ position:static; }
+  }
+</style>
+</head>
+<body>
+
+<p class="hint">Auf eine Kachel klicken, um Details zu öffnen · <kbd>Esc</kbd> zum Zurückkehren</p>
+
+<!-- ============ OVERVIEW (A4 quer) ============ -->
+<div class="stage">
+
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-eyebrow eyebrow">Städtebau-Projekt · Gruppenposter</div>
+      <h1 class="title">TELOSA</h1>
+      <p class="tagline">Eine geplante „15-Minuten-Stadt" für bis zu 5 Millionen Menschen in der US-Wüste, finanziert über gemeinschaftlichen Landbesitz statt Steuern.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><b>5 Mio.</b><span>Ziel bis 2050</span></div>
+      <div class="hero-stat"><b>50.000</b><span>Phase 1 (2030)</span></div>
+      <div class="hero-stat"><b>400 Mrd. $</b><span>Geschätzte Kosten</span></div>
+    </div>
+    <svg class="hero-art" viewBox="0 0 600 320" preserveAspectRatio="xMaxYMax slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#C0922F" stop-opacity="0.9"/>
+          <stop offset="60%" stop-color="#A8481F" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#A8481F" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <g stroke="#3C5A57" stroke-width="1" opacity="0.35">
+        <line x1="0" y1="60" x2="600" y2="60"/><line x1="0" y1="140" x2="600" y2="140"/>
+        <line x1="120" y1="0" x2="120" y2="320"/><line x1="300" y1="0" x2="300" y2="320"/><line x1="480" y1="0" x2="480" y2="320"/>
+      </g>
+      <g fill="none" stroke="#C0922F" stroke-opacity="0.55" stroke-dasharray="3 6">
+        <circle cx="380" cy="300" r="55"/><circle cx="380" cy="300" r="110"/><circle cx="380" cy="300" r="165"/>
+      </g>
+      <circle cx="380" cy="300" r="140" fill="url(#sunGlow)"/>
+      <g fill="#0E1620">
+        <rect x="30" y="240" width="26" height="80"/><rect x="65" y="215" width="20" height="105"/>
+        <rect x="95" y="255" width="30" height="65"/><rect x="440" y="245" width="30" height="75"/>
+        <rect x="480" y="210" width="20" height="110"/><rect x="510" y="260" width="26" height="60"/>
+      </g>
+      <g>
+        <rect x="366" y="150" width="12" height="170" fill="#0E1620"/>
+        <polygon points="358,150 386,150 372,128" fill="#0E1620"/>
+        <circle cx="372" cy="118" r="5" fill="none" stroke="#C0922F" stroke-width="2"/>
+      </g>
+      <line x1="0" y1="320" x2="600" y2="320" stroke="#C0922F" stroke-opacity="0.5"/>
+    </svg>
+  </section>
+
+  <section class="grid">
+    <button class="card c-projekt" onclick="navigate('projekt')">
+      <div class="card-top">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 9l9-6 9 6"/><line x1="12" y1="13" x2="12" y2="17"/></svg>
+        <span class="card-idx">01</span>
+      </div>
+      <div>
+        <h3>Projekt, Standort &amp; Initiator</h3>
+        <p>Wer plant Telosa, wo soll die Stadt entstehen und was ist der aktuelle Stand?</p>
+      </div>
+      <span class="go">Details ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </button>
+
+    <button class="card c-konzept" onclick="navigate('konzept')">
+      <div class="card-top">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>
+        <span class="card-idx">02</span>
+      </div>
+      <div>
+        <h3>Grundidee, Konzept &amp; Ziele</h3>
+        <p>„Equitism", 15-Minuten-Distrikte, autofreie Mobilität &amp; der Equitism Tower.</p>
+      </div>
+      <span class="go">Details ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </button>
+
+    <button class="card c-sozial" onclick="navigate('sozial')">
+      <div class="card-top">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2 20c0-3 2.5-5.5 6-5.5S14 17 14 20M10 20c0-3 2.5-5.5 6-5.5S22 17 22 20"/></svg>
+        <span class="card-idx">03</span>
+      </div>
+      <div>
+        <h3>Bewertung - Sozial</h3>
+        <p>Gerechtere Teilhabe vs. fehlende demokratische Mitbestimmung.</p>
+      </div>
+      <span class="go">Details ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </button>
+
+    <button class="card c-oekonomisch" onclick="navigate('oekonomisch')">
+      <div class="card-top">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="9" height="9" rx="1"/><circle cx="16.5" cy="16.5" r="4.5"/><path d="M16.5 14v2.5l1.8 1"/></svg>
+        <span class="card-idx">04</span>
+      </div>
+      <div>
+        <h3>Bewertung - Ökonomisch</h3>
+        <p>Stiftungsmodell mit Zukunftspotenzial, aber ungeklärte 400-Mrd.-$-Finanzierung.</p>
+      </div>
+      <span class="go">Details ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </button>
+
+    <button class="card c-oekologisch" onclick="navigate('oekologisch')">
+      <div class="card-top">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2c4 3 6 6.5 6 10a6 6 0 11-12 0c0-3.5 2-7 6-10z"/></svg>
+        <span class="card-idx">05</span>
+      </div>
+      <div>
+        <h3>Bewertung - Ökologisch</h3>
+        <p>Konsequent grün geplant, doch Wasserversorgung in der Wüste bleibt Risiko.</p>
+      </div>
+      <span class="go">Details ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </button>
+
+    <button class="card c-kritik" onclick="navigate('kritik')">
+      <div class="card-top">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M4 8l4-3 4 3-4 9-4-9zM20 8l-4-3-4 3 4 9 4-9z"/></svg>
+        <span class="card-idx">06</span>
+      </div>
+      <div>
+        <h3>Eigene Kritik &amp; Lob</h3>
+        <p>Unsere Einschätzung, inkl. der Frage: „Utopie eines Milliardärs"?</p>
+      </div>
+      <span class="go">Details ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </button>
+  </section>
+
+  <footer class="footer">
+    <span>Quellen: cityoftelosa.com · Wikipedia · ArchDaily (2025) · Dezeen (2025) · Axios · Forbes</span>
+    <span>Stand: Juli 2026, Gruppenposter</span>
+  </footer>
+</div>
+
+<!-- ============ SUBPAGE: PROJEKT ============ -->
+<div class="subpage sp-projekt" id="page-projekt">
+  <div class="subpage-topbar">
+    <button class="back-btn" onclick="navigate('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Übersicht</button>
+    <span class="crumb">TELOSA / <b>01 Projekt, Standort &amp; Initiator</b></span>
+  </div>
+  <div class="subpage-hero">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 9l9-6 9 6"/><line x1="12" y1="13" x2="12" y2="17"/></svg>
+    <div>
+      <h2>Projekt, Standort &amp; Initiator</h2>
+      <p>Der Steckbrief: Was Telosa sein soll, wo es entstehen könnte und wer dahintersteckt.</p>
+    </div>
+  </div>
+  <div class="subpage-body">
+    <div class="fact-cards">
+      <div class="fact-card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 9l9-6 9 6"/><line x1="12" y1="13" x2="12" y2="17"/></svg>
+        <h3>Projekt</h3>
+        <ul>
+          <li>Telosa von altgriech. <em>telos</em> ("Ziel/Zweck"): komplett neu geplante Stadt</li>
+          <li>Angekündigt 2021; bislang reines Planungsprojekt ohne Baugenehmigung oder Spatenstich (Stand 2026)</li>
+          <li>2025 lag der Fokus laut Projektleitung auf „Community-Building" statt konkreter Bauplanung</li>
+        </ul>
+      </div>
+      <div class="fact-card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <h3>Standort</h3>
+        <ul>
+          <li>Noch nicht final festgelegt</li>
+          <li>Favorisiert: Wüstenregionen in <strong>Nevada, Utah oder Arizona</strong> (früher auch Idaho, Texas, Appalachen im Gespräch)</li>
+          <li>Geplante Fläche: ca. 150.000–159.000 Acres (~ 60.000 Hektar) etwa so groß wie Chicago</li>
+        </ul>
+      </div>
+      <div class="fact-card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+        <h3>Initiator</h3>
+        <ul>
+          <li><strong>Marc Lore</strong> US-Unternehmer, u. a. Mitgründer Diapers.com &amp; Jet.com, ehem. Chef E-Commerce bei Walmart US, Mitinhaber NBA-Team Minnesota Timberwolves</li>
+          <li>Masterplan: Architekturbüro <strong>Bjarke Ingels Group (BIG)</strong></li>
+          <li>Governance-Beratung u. a. durch Preet Bharara, ehem. US-Bundesstaatsanwalt</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sources-box"><b>Quellen</b>cityoftelosa.com (FAQ) · Wikipedia: „Telosa" · Forbes: Marc-Lore-Profil</div>
+  </div>
+</div>
+
+<!-- ============ SUBPAGE: KONZEPT ============ -->
+<div class="subpage sp-konzept" id="page-konzept">
+  <div class="subpage-topbar">
+    <button class="back-btn" onclick="navigate('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Übersicht</button>
+    <span class="crumb">TELOSA / <b>02 Grundidee, Konzept &amp; Ziele</b></span>
+  </div>
+  <div class="subpage-hero">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>
+    <div>
+      <h2>Grundidee, Konzept &amp; Ziele</h2>
+      <p>Fünf Prinzipien sollen Telosa zur Blaupause für gerechtere Stadtentwicklung machen.</p>
+    </div>
+  </div>
+  <div class="subpage-body">
+    <p class="intro-text">Telosa will als Blaupause für eine gerechtere, technologisch fortschrittliche Stadtentwicklung dienen. Leitprinzip ist <strong>„Equitism"</strong>: Das gesamte Stadtland gehört nicht Privatpersonen, sondern einer gemeinnützigen Stiftung. Steigt der Wert des Landes mit dem Wachstum der Stadt, fließt der Erlös in soziale Leistungen ohne zusätzliche Steuern.</p>
+    <div class="feature-grid">
+      <div class="feature">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="10" height="10" rx="1"/><circle cx="16.5" cy="16.5" r="4.5"/><path d="M16.5 14v2.5l1.8 1"/></svg>
+        <h4>Equitism</h4>
+        <p>Land gehört einer Stiftung; Wertzuwachs finanziert Bildung, Gesundheit &amp; Wohnen.</p>
+      </div>
+      <div class="feature">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+        <h4>15-Min-Stadt</h4>
+        <p>36 Distrikte, Alltag, Arbeit &amp; Bildung in 15 Gehminuten erreichbar.</p>
+      </div>
+      <div class="feature">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 18l6-11h4M12 7l3 6h-9"/></svg>
+        <h4>Mobilität</h4>
+        <p>Keine fossilen Autos, autonome E-Fahrzeuge, Rad- &amp; Fußverkehr im Zentrum.</p>
+      </div>
+      <div class="feature">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v20M8 22h8"/><path d="M12 2l6 5H6l6-5z"/><circle cx="12" cy="11" r="2"/></svg>
+        <h4>Equitism Tower</h4>
+        <p>Wahrzeichen mit Wasserspeicher, aeroponischen Farmen &amp; Photovoltaik-Dach.</p>
+      </div>
+      <div class="feature">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3c4 3 6 6.5 6 10a6 6 0 11-12 0c0-3.5 2-7 6-10z"/></svg>
+        <h4>Nachhaltigkeit</h4>
+        <p>100 % erneuerbare Energie, Wasser-Recycling, Kreislaufwirtschaft, Ökosystemfonds.</p>
+      </div>
+    </div>
+    <div class="sources-box"><b>Quellen</b>cityoftelosa.com · ArchDaily (Sept. 2025) · Dezeen (Aug. 2025)</div>
+  </div>
+</div>
+
+<!-- ============ SUBPAGE: SOZIAL ============ -->
+<div class="subpage sp-sozial" id="page-sozial">
+  <div class="subpage-topbar">
+    <button class="back-btn" onclick="navigate('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Übersicht</button>
+    <span class="crumb">TELOSA / <b>03 Bewertung - Sozial</b></span>
+  </div>
+  <div class="subpage-hero">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2 20c0-3 2.5-5.5 6-5.5S14 17 14 20M10 20c0-3 2.5-5.5 6-5.5S22 17 22 20"/></svg>
+    <div>
+      <h2>Bewertung - Sozial</h2>
+      <p>Wie gerecht und inklusiv wäre das Leben in Telosa wirklich?</p>
+    </div>
+  </div>
+  <div class="subpage-body">
+    <div class="pro-contra">
+      <div class="pc-col">
+        <h3>Begründung - Pro</h3>
+        <ul class="pc-list">
+          <li><span class="mark plus">+</span> Gemeinschaftlicher Landbesitz könnte Vermögensungleichheit langfristig verringern</li>
+          <li><span class="mark plus">+</span> Ziel: bezahlbarer, durchmischter Wohnraum &amp; transparente Bürger:innenbeteiligung</li>
+          <li><span class="mark plus">+</span> Alle Ratssitzungen und Korrespondenz sollen öffentlich einsehbar sein</li>
+        </ul>
+      </div>
+      <div class="pc-col">
+        <h3>Begründung - Contra</h3>
+        <ul class="pc-list">
+          <li><span class="mark minus">–</span> Es gibt noch keine reale Bevölkerung, zentrale Entscheidungen fallen bislang „von oben"</li>
+          <li><span class="mark minus">–</span> Vergleichbare Planstädte zeigen: soziale Durchmischung lässt sich nicht am Reißbrett erzwingen</li>
+          <li><span class="mark minus">–</span> Wer sich eine Ansiedlung in einer neuen Wüstenstadt leisten kann, ist zunächst eine selektive Gruppe</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sources-box"><b>Quellen</b>cityoftelosa.com (FAQ) · Smart Cities Dive (2022)</div>
+  </div>
+</div>
+
+<!-- ============ SUBPAGE: ÖKONOMISCH ============ -->
+<div class="subpage sp-oekonomisch" id="page-oekonomisch">
+  <div class="subpage-topbar">
+    <button class="back-btn" onclick="navigate('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Übersicht</button>
+    <span class="crumb">TELOSA / <b>04 Bewertung - Ökonomisch</b></span>
+  </div>
+  <div class="subpage-hero">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="9" height="9" rx="1"/><circle cx="16.5" cy="16.5" r="4.5"/><path d="M16.5 14v2.5l1.8 1"/></svg>
+    <div>
+      <h2>Bewertung - Ökonomisch</h2>
+      <p>Ein Stiftungsmodell mit Potenzial - bei einer der größten offenen Finanzierungsfragen der Stadtplanung.</p>
+    </div>
+  </div>
+  <div class="subpage-body">
+    <div class="pro-contra">
+      <div class="pc-col">
+        <h3>Begründung - Pro</h3>
+        <ul class="pc-list">
+          <li><span class="mark plus">+</span> Stiftungsmodell könnte dauerhafte Einnahmen sichern - ähnlich einer Uni-Stiftung</li>
+          <li><span class="mark plus">+</span> Planung „auf der grünen Wiese" erlaubt moderne Technik ohne teure Nachrüstung</li>
+          <li><span class="mark plus">+</span> Soziale Leistungen sollen ohne höhere Steuern finanziert werden</li>
+        </ul>
+      </div>
+      <div class="pc-col">
+        <h3>Begründung - Contra</h3>
+        <ul class="pc-list">
+          <li><span class="mark minus">–</span> Geschätzte Kosten: 25 Mrd. $ für Phase 1, über 400 Mrd. $ im Vollausbau -> Finanzierung offen</li>
+          <li><span class="mark minus">–</span> Seit 2021 kein fixer Standort und kein Baubeginn -> hohes Scheiternsrisiko</li>
+          <li><span class="mark minus">–</span> Das Modell setzt dauerhaft steigende Landwerte voraus -> eine riskante Wachstumsannahme</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sources-box"><b>Quellen</b>cityoftelosa.com (FAQ) · ArchDaily (2025) · Axios (2022)</div>
+  </div>
+</div>
+
+<!-- ============ SUBPAGE: ÖKOLOGISCH ============ -->
+<div class="subpage sp-oekologisch" id="page-oekologisch">
+  <div class="subpage-topbar">
+    <button class="back-btn" onclick="navigate('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Übersicht</button>
+    <span class="crumb">TELOSA / <b>05 Bewertung - Ökologisch</b></span>
+  </div>
+  <div class="subpage-hero">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2c4 3 6 6.5 6 10a6 6 0 11-12 0c0-3.5 2-7 6-10z"/></svg>
+    <div>
+      <h2>Bewertung - Ökologisch</h2>
+      <p>Konsequent grün geplant, aber eine Stadt in der Wüste bleibt eine wasserintensive Wette.</p>
+    </div>
+  </div>
+  <div class="subpage-body">
+    <div class="pro-contra">
+      <div class="pc-col">
+        <h3>Begründung - Pro</h3>
+        <ul class="pc-list">
+          <li><span class="mark plus">+</span> Erneuerbare Energie, autofreie Mobilität &amp; Kreislaufwirtschaft von Beginn an mitgedacht</li>
+          <li><span class="mark plus">+</span> Ökosystemfonds soll Wüstenlebensräume der Region aktiv schützen</li>
+          <li><span class="mark plus">+</span> Dürreresistentes Wassersystem mit Grundwasser-Regeneration als Planungsprinzip</li>
+        </ul>
+      </div>
+      <div class="pc-col">
+        <h3>Begründung - Contra</h3>
+        <ul class="pc-list">
+          <li><span class="mark minus">–</span> Eine komplette Neustadt in der Wüste ist per se flächen- &amp; ressourcenintensiv</li>
+          <li><span class="mark minus">–</span> Wasserversorgung für Millionen Menschen gilt in dürregefährdeten Regionen als größtes Risiko</li>
+          <li><span class="mark minus">–</span> Experten weisen darauf hin, dass Grundwasser im US-Westen bereits jetzt überstrapaziert ist</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sources-box"><b>Quellen</b>The Cool Down (2024) · ArchDaily (2025) · Smart Cities Dive (2022)</div>
+  </div>
+</div>
+
+<!-- ============ SUBPAGE: KRITIK & LOB ============ -->
+<div class="subpage sp-kritik" id="page-kritik">
+  <div class="subpage-topbar">
+    <button class="back-btn" onclick="navigate('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Übersicht</button>
+    <span class="crumb">TELOSA / <b>06 Eigene Kritik &amp; Lob</b></span>
+  </div>
+  <div class="subpage-hero">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v18M4 8l4-3 4 3-4 9-4-9zM20 8l-4-3-4 3 4 9 4-9z"/></svg>
+    <div>
+      <h2>Eigene Kritik &amp; Lob der Gruppe</h2>
+      <p>Unsere Einschätzung nach der Auseinandersetzung mit dem Projekt.</p>
+    </div>
+  </div>
+  <div class="subpage-body">
+    <div class="lob-kritik">
+      <div class="ek-block lob">
+        <h3>👍 Lob</h3>
+        <ul>
+          <li>Mutiger Denkanstoß zu gerechterer Bodenpolitik und autofreier Stadtplanung</li>
+          <li>Bündelt namhafte Expertise (Star-Architektur, Governance-Beratung)</li>
+          <li>Setzt hohe Nachhaltigkeitsstandards von Anfang an statt als Nachrüstung</li>
+        </ul>
+      </div>
+      <div class="ek-block kritik">
+        <h3>👎 Kritik</h3>
+        <ul>
+          <li>Seit über vier Jahren (2021–2026) kein fixer Standort, kein Baubeginn, bislang nur Renderings</li>
+          <li>Demokratische Legitimation der Planung bleibt ungeklärt</li>
+          <li>Grundwiderspruch: eine „nachhaltige" Stadt neu in die Wüste zu bauen, statt bestehende Städte umzubauen</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="system-critique">
+      <div class="sc-head">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v18M4 8l4-3 4 3-4 9-4-9zM20 8l-4-3-4 3 4 9 4-9z"/></svg>
+        <h3>Systemkritischer Einwand: „Die Utopie eines Milliardärs"</h3>
+      </div>
+      <p>Telosa versucht mit „Equitism" gezielt einzelne Symptome des Kapitalismus abzufedern, etwa Bodenspekulation und wachsende Ungleichheit. Das Fundament bleibt aber ein zutiefst instabiles: Die Finanzierung hängt vollständig von privaten Investor:innen, freiwilliger Philanthropie und vor allem von <strong>steigenden Landwerten</strong> ab. Bleibt das erhoffte Wachstum aus, wie bei vielen Retortenstädten zuvor, kann das gesamte Finanzierungsmodell scheitern, weil es genau jenes Wachstumsversprechen voraussetzt, dessen Nebenwirkungen es eigentlich abfedern soll.</p>
+      <p>Hinzu kommt: Die Regeln der „gerechteren" Stadt legt ein einzelner Milliardär und sein Beraterkreis fest ohne demokratisches Mandat der (noch nicht existierenden) Bewohner:innen. Genau jene Machtkonzentration, die Kritiker:innen für Ungleichheit im Kapitalismus verantwortlich machen, wiederholt sich damit im Entstehungsprozess von Telosa selbst. Manche Beobachter:innen sprechen daher von einer <strong>„Utopie eines Milliardärs"</strong> statt einer echten Graswurzelbewegung.</p>
+      <p class="counter">Befürworter:innen halten dagegen: Equitism sei bewusst als Reform <em>innerhalb</em> des bestehenden Systems gedacht, nicht als dessen Überwindung und selbst eine Teillösung sei besser als der Status quo.</p>
+    </div>
+
+    <div class="fazit">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l2.4 7h7.6l-6 4.8 2.4 7-6.4-4.8L5.6 21l2.4-7-6-4.8h7.6z"/></svg>
+      <p><b>Fazit:</b> Telosa ist ein faszinierendes Gedankenexperiment über Bodenbesitz, Mobilität und Nachhaltigkeit. Ob daraus tatsächlich eine reale Stadt entsteht oder ob das Projekt an denselben kapitalistischen Wachstumszwängen scheitert, die es lösen will, ist nach heutigem Stand (Sommer 2026) weiterhin offen.</p>
+    </div>
+    <div class="sources-box"><b>Quellen</b>ArchDaily (2025) · CPG Click Oil and Gas (2025) · Dezeen (2025) · eigene Analyse der Gruppe</div>
+  </div>
+</div>
+
+<script>
+  // This function ONLY handles updating the visual DOM states
+  function updateView(id) {
+    document.querySelectorAll('.subpage').forEach(function(p){ 
+      p.classList.remove('active'); 
+    });
+    
+    if(id && id !== 'overview'){
+      var el = document.getElementById('page-' + id);
+      if(el){
+        el.classList.add('active');
+        el.scrollTop = 0;
+      }
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }
+
+  // This function changes the hash, which naturally fires 'hashchange'
+  function navigate(id){
+    if(id === 'overview' || !id) {
+      // Prevents adding an empty '#' to history on some mobile browsers
+      history.pushState("", document.title, window.location.pathname + window.location.search);
+      updateView('overview');
+    } else {
+      location.hash = id;
+    }
+  }
+
+  // Listen to hash changes safely
+  window.addEventListener('hashchange', function(){
+    var id = location.hash.replace('#','');
+    updateView(id || 'overview');
+  });
+
+  // Keyboard accessibility
+  window.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') navigate('overview');
+  });
+
+  // Handle direct links or refreshes on page load
+  document.addEventListener('DOMContentLoaded', function(){
+    var id = location.hash.replace('#','');
+    if (id) {
+      updateView(id);
+    }
+  });
+</script>
+
+</body>
+</html>
