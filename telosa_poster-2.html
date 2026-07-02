@@ -150,6 +150,9 @@
     position:relative;
     transition:background 0.18s ease, transform 0.18s ease;
     color:var(--ink);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
     .card{ touch-action:manipulation; -webkit-tap-highlight-color:rgba(0,0,0,0); }
   @media (hover:hover) and (pointer:fine){
@@ -179,12 +182,24 @@
   .card .go svg{ width:0.9em; height:0.9em; transition:transform 0.18s ease; }
   .card:hover .go svg{ transform:translateX(3px); }
 
-  .card.c-projekt   .icon,.card.c-projekt   .go{ color:var(--night-2); }
-  .card.c-konzept   .icon,.card.c-konzept   .go{ color:var(--teal-deep); }
-  .card.c-sozial    .icon,.card.c-sozial    .go{ color:var(--gold-deep); }
-  .card.c-oekonomisch .icon,.card.c-oekonomisch .go{ color:var(--rust-deep); }
-  .card.c-oekologisch .icon,.card.c-oekologisch .go{ color:var(--teal-deep); }
-  .card.c-kritik    .icon,.card.c-kritik    .go{ color:var(--rust-deep); }
+.card.c-projekt { 
+  background-image: linear-gradient(rgba(236, 227, 206, 0.85), rgba(236, 227, 206, 0.85)), url('images/Idee.jpg'); 
+}
+.card.c-konzept { 
+  background-image: linear-gradient(rgba(236, 227, 206, 0.85), rgba(236, 227, 206, 0.85)), url('images/projekt standort.jpg'); 
+}
+.card.c-sozial { 
+  background-image: linear-gradient(rgba(236, 227, 206, 0.85), rgba(236, 227, 206, 0.85)), url('images/Sozial.jpg'); 
+}
+.card.c-oekonomisch { 
+  background-image: linear-gradient(rgba(236, 227, 206, 0.85), rgba(236, 227, 206, 0.85)), url('images/Money.jpg'); 
+}
+.card.c-oekologisch { 
+  background-image: linear-gradient(rgba(236, 227, 206, 0.85), rgba(236, 227, 206, 0.85)), url('images/Öko shit.jpg'); 
+}
+.card.c-kritik { 
+  background-image: linear-gradient(rgba(236, 227, 206, 0.85), rgba(236, 227, 206, 0.85)), url('images/Kritik und lob.jpg'); 
+}
 
   .card::after{
     content:"";
